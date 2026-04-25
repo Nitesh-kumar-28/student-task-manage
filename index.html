@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Student Task Manager — A modern, minimal task management app for students to organize assignments, projects, and daily tasks efficiently." />
+  <title>Student Task Manager</title>
+
+  <!-- Google Fonts — Inter for clean, modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Phosphor Icons — lightweight, elegant icon set -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ───────────────────── Background decoration ───────────────────── -->
+  <div class="bg-decoration" aria-hidden="true">
+    <div class="blob blob--1"></div>
+    <div class="blob blob--2"></div>
+    <div class="blob blob--3"></div>
+  </div>
+
+  <!-- ───────────────────── App Shell ───────────────────── -->
+  <div id="app" class="app">
+
+    <!-- ─── Sidebar ─── -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar__brand">
+        <div class="sidebar__logo">
+          <i class="ph ph-check-square"></i>
+        </div>
+        <h1 class="sidebar__title">TaskFlow</h1>
+      </div>
+
+      <!-- Filter navigation -->
+      <nav class="sidebar__nav" aria-label="Task filters">
+        <button class="nav-btn nav-btn--active" data-filter="all" id="filter-all">
+          <i class="ph ph-list-bullets"></i>
+          <span>All Tasks</span>
+          <span class="nav-btn__count" id="count-all">0</span>
+        </button>
+        <button class="nav-btn" data-filter="pending" id="filter-pending">
+          <i class="ph ph-clock"></i>
+          <span>Pending</span>
+          <span class="nav-btn__count" id="count-pending">0</span>
+        </button>
+        <button class="nav-btn" data-filter="completed" id="filter-completed">
+          <i class="ph ph-check-circle"></i>
+          <span>Completed</span>
+          <span class="nav-btn__count" id="count-completed">0</span>
+        </button>
+      </nav>
+
+      <!-- Stats card -->
+      <div class="sidebar__stats">
+        <h3 class="stats__title">Progress</h3>
+        <div class="stats__progress-ring-wrapper">
+          <svg class="stats__ring" viewBox="0 0 120 120">
+            <circle class="stats__ring-bg" cx="60" cy="60" r="52" />
+            <circle class="stats__ring-fill" id="progress-ring" cx="60" cy="60" r="52" />
+          </svg>
+          <span class="stats__percent" id="progress-percent">0%</span>
+        </div>
+        <p class="stats__label"><span id="stats-completed">0</span> of <span id="stats-total">0</span> tasks done</p>
+      </div>
+
+      <!-- Mobile close button -->
+      <button class="sidebar__close" id="sidebar-close" aria-label="Close sidebar">
+        <i class="ph ph-x"></i>
+      </button>
+    </aside>
+
+    <!-- ─── Main Content ─── -->
+    <main class="main">
+
+      <!-- Top bar -->
+      <header class="topbar">
+        <button class="topbar__menu" id="sidebar-toggle" aria-label="Open sidebar">
+          <i class="ph ph-list"></i>
+        </button>
+        <div class="topbar__greet">
+          <h2 class="topbar__heading" id="greeting-text">Good Morning 👋</h2>
+          <p class="topbar__sub">What will you accomplish today?</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="topbar__theme" id="theme-toggle" aria-label="Toggle dark mode">
+            <i class="ph ph-moon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Add-task form -->
+      <form class="add-task" id="add-task-form" autocomplete="off">
+        <div class="add-task__field">
+          <i class="ph ph-plus-circle add-task__icon"></i>
+          <input
+            type="text"
+            class="add-task__input"
+            id="task-input"
+            placeholder="Add a new task…"
+            maxlength="120"
+            required
+          />
+        </div>
+        <div class="add-task__extras">
+          <!-- Priority selector -->
+          <div class="priority-selector" id="priority-selector">
+            <button type="button" class="priority-btn priority-btn--low priority-btn--active" data-priority="low" title="Low priority">
+              <i class="ph ph-flag"></i> Low
+            </button>
+            <button type="button" class="priority-btn priority-btn--medium" data-priority="medium" title="Medium priority">
+              <i class="ph ph-flag"></i> Med
+            </button>
+            <button type="button" class="priority-btn priority-btn--high" data-priority="high" title="High priority">
+              <i class="ph ph-flag"></i> High
+            </button>
+          </div>
+          <button type="submit" class="add-task__submit" id="add-task-submit">
+            <i class="ph ph-paper-plane-tilt"></i>
+            <span>Add Task</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Task list -->
+      <section class="task-list-section">
+        <div class="task-list__header">
+          <h3 class="task-list__title" id="task-list-title">All Tasks</h3>
+          <button class="task-list__clear" id="clear-completed" title="Clear completed tasks">
+            <i class="ph ph-trash"></i>
+            <span>Clear Done</span>
+          </button>
+        </div>
+
+        <ul class="task-list" id="task-list" role="list">
+          <!-- Tasks are rendered dynamically -->
+        </ul>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-state__icon">
+            <i class="ph ph-clipboard-text"></i>
+          </div>
+          <h3 class="empty-state__title">No tasks yet</h3>
+          <p class="empty-state__text">Add your first task above to get started!</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ─── Edit Modal ─── -->
+  <div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-title">Edit Task</h3>
+        <button class="modal__close" id="modal-close" aria-label="Close modal">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+      <form class="modal__form" id="edit-task-form">
+        <input type="hidden" id="edit-task-id" />
+        <div class="modal__field">
+          <label for="edit-task-input" class="modal__label">Task name</label>
+          <input type="text" class="modal__input" id="edit-task-input" maxlength="120" required />
+        </div>
+        <div class="modal__field">
+          <label class="modal__label">Priority</label>
+          <div class="priority-selector" id="edit-priority-selector">
+            <button type="button" class="priority-btn priority-btn--low" data-priority="low">
+              <i class="ph ph-flag"></i> Low
+            </button>
+            <button type="button" class="priority-btn priority-btn--medium" data-priority="medium">
+              <i class="ph ph-flag"></i> Med
+            </button>
+            <button type="button" class="priority-btn priority-btn--high" data-priority="high">
+              <i class="ph ph-flag"></i> High
+            </button>
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
